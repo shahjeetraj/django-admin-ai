@@ -135,24 +135,70 @@ def extract_data(form_fields, file_content):
     client = OpenAI(api_key=OPENAI_API_KEY)
 
     prompt = f"""
-    You are a data extraction assistant. Your job is to extract structured data from the provided text.
-    The data should be formatted as JSON that correctly matches the Django form fields.
+    You are a travel content expert and HTML formatter.
 
-    Extracted text from the file:
+    Your job is to extract structured travel package data from the content and return CLEAN JSON.
+
+    IMPORTANT RULES:
+
+    1. Return ONLY valid JSON (no explanation)
+    2. Some fields MUST be returned in HTML format (not plain text)
+
     ---
+
+    ### FIELD RULES:
+
+    - title → plain text (SEO optimized)
+    - slug → URL-friendly (lowercase, hyphenated)
+    - duration → string like "4 Nights / 5 Days"
+    - price → integer only
+
+    - highlights → MUST be HTML:
+    Format:
+    <div class="highlights">
+        <h2>✨ Tour Highlights</h2>
+        <ul>
+        <li>✔ Point 1</li>
+        <li>✔ Point 2</li>
+        </ul>
+    </div>
+
+    - overview → MUST be FULL HTML:
+    Include:
+    - Title
+    - Description paragraph
+    - Day-wise itinerary (div.day)
+    - Inclusions section
+    - Exclusions section
+
+    - seo_title → max 70 chars
+    - seo_description → max 160 chars
+    - dmc_name → extract if available
+
+    ---
+
+    ### INPUT CONTENT:
     {file_content}
+
     ---
 
-    Django form structure:
-    ---
+    ### DJANGO FORM FIELDS:
     {form_fields}
+
     ---
 
-    Return only a valid JSON with key-value pairs corresponding to the form fields. Ensure:
-    - `BooleanField` values are `true` or `false`.
-    - `DecimalField` values are properly formatted (e.g., `1000.50`).
-    - `IntegerField` values are whole numbers.
-    - `DateField` values follow the `YYYY-MM-DD` format.
+    Return JSON like:
+    {{
+    "title": "...",
+    "slug": "...",
+    "duration": "...",
+    "price": 12345,
+    "highlights": "<div class='highlights'>...</div>",
+    "overview": "<div class='package'>...</div>",
+    "seo_title": "...",
+    "seo_description": "...",
+    "dmc_name": "..."
+    }}
     """
 
     try:
