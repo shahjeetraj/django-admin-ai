@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+import os
 
 setup(
     name="django-admin-ai",  # Package name
@@ -54,3 +55,11 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
 )
+
+def read_readme():
+    if os.path.exists("README.md"):
+        with open("README.md", "r") as fh:
+            return fh.read()
+    return ""
+
+long_description = read_readme()
